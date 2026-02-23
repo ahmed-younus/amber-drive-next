@@ -14,8 +14,10 @@ import {
   Send,
   CheckCircle,
   ArrowRight,
+  TrendingUp,
 } from "lucide-react";
 import { QUOTE_STATUS_COLORS } from "@/lib/constants";
+import { motion } from "framer-motion";
 
 interface Stats {
   total_cars: number;
@@ -35,6 +37,19 @@ interface Stats {
   }>;
 }
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.06 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] as const } },
+};
+
 export default function DashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,10 +67,15 @@ export default function DashboardPage() {
         <PageHeader title="Dashboard" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[...Array(4)].map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
+            <Skeleton key={i} className="h-32 rounded-2xl" />
           ))}
         </div>
-        <Skeleton className="h-64 rounded-xl" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-20 rounded-2xl" />
+          ))}
+        </div>
+        <Skeleton className="h-72 rounded-2xl" />
       </div>
     );
   }
@@ -68,159 +88,177 @@ export default function DashboardPage() {
       value: stats.active_cars,
       total: stats.total_cars,
       icon: Car,
-      color: "from-violet-500 to-purple-600",
+      iconBg: "bg-violet-100 text-violet-600",
+      accent: "border-l-violet-500",
       href: "/cars",
     },
     {
       label: "Total Quotes",
       value: stats.total_quotes,
       icon: FileText,
-      color: "from-pink-500 to-rose-600",
+      iconBg: "bg-rose-100 text-rose-600",
+      accent: "border-l-rose-500",
       href: "/quotes",
     },
     {
       label: "Sent Quotes",
       value: stats.sent_quotes,
       icon: Send,
-      color: "from-blue-500 to-indigo-600",
+      iconBg: "bg-blue-100 text-blue-600",
+      accent: "border-l-blue-500",
       href: "/quotes",
     },
     {
       label: "Confirmed",
       value: stats.confirmed_quotes,
       icon: CheckCircle,
-      color: "from-emerald-500 to-green-600",
+      iconBg: "bg-emerald-100 text-emerald-600",
+      accent: "border-l-emerald-500",
       href: "/quotes",
     },
   ];
 
+  const quickActions = [
+    { href: "/quotes/create", icon: Plus, label: "Create Quote", iconColor: "text-amber-600" },
+    { href: "/cars/add", icon: Car, label: "Add Car", iconColor: "text-violet-600" },
+    { href: "/cars", icon: TrendingUp, label: "Manage Cars", iconColor: "text-blue-600" },
+    { href: "/quotes", icon: FileText, label: "View Quotes", iconColor: "text-emerald-600" },
+  ];
+
   return (
-    <div>
-      <PageHeader title="Dashboard" description="Welcome to Amber Drive Admin">
-        <Link href="/quotes/create">
-          <Button className="gap-2 bg-primary hover:bg-primary/90">
-            <Plus className="h-4 w-4" />
-            New Quote
-          </Button>
-        </Link>
-      </PageHeader>
+    <motion.div
+      initial="hidden"
+      animate="show"
+      variants={container}
+    >
+      <motion.div variants={item}>
+        <PageHeader title="Dashboard" description="Welcome to Amber Drive Admin">
+          <Link href="/quotes/create">
+            <Button className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Quote
+            </Button>
+          </Link>
+        </PageHeader>
+      </motion.div>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {statCards.map((card) => (
-          <Link key={card.label} href={card.href}>
-            <Card className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer border-0">
-              <CardContent
-                className={`p-5 bg-gradient-to-br ${card.color} text-white`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-white/80">
-                      {card.label}
-                    </p>
-                    <p className="text-3xl font-bold mt-1">{card.value}</p>
-                    {card.total !== undefined && (
-                      <p className="text-xs text-white/70 mt-1">
-                        of {card.total} total
+          <motion.div key={card.label} variants={item}>
+            <Link href={card.href}>
+              <Card className={`overflow-hidden hover:shadow-glass-hover cursor-pointer border-l-4 ${card.accent}`}>
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">
+                        {card.label}
                       </p>
-                    )}
+                      <p className="text-3xl font-bold mt-2 tabular-nums tracking-tight">
+                        {card.value}
+                      </p>
+                      {card.total !== undefined && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          of {card.total} total
+                        </p>
+                      )}
+                    </div>
+                    <div className={`h-11 w-11 rounded-xl ${card.iconBg} flex items-center justify-center flex-shrink-0`}>
+                      <card.icon className="h-5 w-5" />
+                    </div>
                   </div>
-                  <card.icon className="h-10 w-10 text-white/30" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+                </CardContent>
+              </Card>
+            </Link>
+          </motion.div>
         ))}
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-        <Link href="/quotes/create">
-          <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-            <Plus className="h-5 w-5 text-primary" />
-            <span className="text-xs font-medium">Create Quote</span>
-          </Button>
-        </Link>
-        <Link href="/cars/add">
-          <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-            <Car className="h-5 w-5 text-primary" />
-            <span className="text-xs font-medium">Add Car</span>
-          </Button>
-        </Link>
-        <Link href="/cars">
-          <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-            <Car className="h-5 w-5 text-primary" />
-            <span className="text-xs font-medium">Manage Cars</span>
-          </Button>
-        </Link>
-        <Link href="/quotes">
-          <Button variant="outline" className="w-full h-auto py-4 flex-col gap-2">
-            <FileText className="h-5 w-5 text-primary" />
-            <span className="text-xs font-medium">View Quotes</span>
-          </Button>
-        </Link>
-      </div>
+      <motion.div variants={item} className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+        {quickActions.map((action) => (
+          <Link key={action.href + action.label} href={action.href}>
+            <Card className="hover:shadow-glass-hover cursor-pointer group">
+              <CardContent className="p-4 flex flex-col items-center gap-2.5 text-center">
+                <div className="h-10 w-10 rounded-xl bg-white/80 shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
+                  <action.icon className={`h-5 w-5 ${action.iconColor}`} />
+                </div>
+                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+                  {action.label}
+                </span>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </motion.div>
 
       {/* Recent Quotes */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Recent Quotes</h2>
-            <Link href="/quotes">
-              <Button variant="ghost" size="sm" className="gap-1 text-primary">
-                View All <ArrowRight className="h-3 w-3" />
-              </Button>
-            </Link>
-          </div>
-
-          {stats.recent_quotes.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              No quotes yet. Create your first quote!
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {stats.recent_quotes.map((quote) => (
-                <Link
-                  key={quote.id}
-                  href={`/quotes/${quote.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors group"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <FileText className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">
-                        {quote.clientName || "No Name"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {quote.quoteNumber} &middot;{" "}
-                        {quote.quoteCars?.length || 0} car(s)
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    {quote.totalAmount && (
-                      <span className="text-sm font-semibold hidden sm:block">
-                        &euro; {Number(quote.totalAmount).toLocaleString()}
-                      </span>
-                    )}
-                    <Badge
-                      variant="secondary"
-                      className={
-                        QUOTE_STATUS_COLORS[quote.status] || ""
-                      }
-                    >
-                      {quote.status}
-                    </Badge>
-                    <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                </Link>
-              ))}
+      <motion.div variants={item}>
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-semibold">Recent Quotes</h2>
+              <Link href="/quotes">
+                <Button variant="ghost" size="sm" className="gap-1.5 text-primary">
+                  View All <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
             </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+
+            {stats.recent_quotes.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                  <FileText className="h-7 w-7 text-muted-foreground/50" />
+                </div>
+                <p className="text-muted-foreground text-sm">
+                  No quotes yet. Create your first quote!
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {stats.recent_quotes.map((quote) => (
+                  <Link
+                    key={quote.id}
+                    href={`/quotes/${quote.id}`}
+                    className="flex items-center justify-between p-3.5 rounded-xl hover:bg-white/60 transition-all duration-200 group"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {quote.clientName || "No Name"}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {quote.quoteNumber} &middot;{" "}
+                          {quote.quoteCars?.length || 0} car(s)
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      {quote.totalAmount && (
+                        <span className="text-sm font-semibold hidden sm:block tabular-nums">
+                          &euro; {Number(quote.totalAmount).toLocaleString()}
+                        </span>
+                      )}
+                      <Badge
+                        variant="secondary"
+                        className={
+                          QUOTE_STATUS_COLORS[quote.status] || ""
+                        }
+                      >
+                        {quote.status}
+                      </Badge>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

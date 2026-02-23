@@ -31,6 +31,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import { ADMIN_EMAIL } from "@/lib/constants";
 
 interface QuoteCar {
@@ -236,8 +237,8 @@ export default function QuotePreviewPage() {
     return (
       <div>
         <PageHeader title="Quote Preview" />
-        <Skeleton className="h-12 w-full mb-4 rounded-lg" />
-        <Skeleton className="h-96 w-full rounded-xl" />
+        <Skeleton className="h-12 w-full mb-4 rounded-2xl" />
+        <Skeleton className="h-96 w-full rounded-2xl" />
       </div>
     );
   }
@@ -246,7 +247,14 @@ export default function QuotePreviewPage() {
     return (
       <div>
         <PageHeader title="Quote Not Found" />
-        <p className="text-muted-foreground">This quote does not exist.</p>
+        <Card>
+          <CardContent className="flex flex-col items-center py-16">
+            <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+              <CarIcon className="h-7 w-7 text-muted-foreground/50" />
+            </div>
+            <p className="text-muted-foreground">This quote does not exist.</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -254,24 +262,28 @@ export default function QuotePreviewPage() {
   const designWidth = quote.quoteCars.length <= 2 ? 950 : 440 * 3 + 30 * 2 + 40;
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+    >
       <PageHeader
         title="Quote Preview"
         description={`${quote.quoteNumber} ${clientName ? "• " + clientName : ""}`}
       >
         <div className="flex items-center gap-2">
           {saving === "saving" && (
-            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 gap-1">
+            <Badge variant="secondary" className="bg-amber-100 text-amber-800 gap-1.5 border-amber-200">
               <Loader2 className="h-3 w-3 animate-spin" /> Saving...
             </Badge>
           )}
           {saving === "saved" && (
-            <Badge variant="secondary" className="bg-green-100 text-green-800 gap-1">
+            <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 gap-1.5 border-emerald-200">
               <Check className="h-3 w-3" /> Saved
             </Badge>
           )}
           <Select value={quote.status} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-32 h-8">
+            <SelectTrigger className="w-32 h-9 bg-white/50 backdrop-blur-sm border-white/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -281,27 +293,27 @@ export default function QuotePreviewPage() {
             </SelectContent>
           </Select>
           <Button size="sm" variant="destructive" onClick={handleDelete} className="gap-1">
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </PageHeader>
 
       <Tabs defaultValue="edit">
-        <TabsList className="mb-4 w-full sm:w-auto">
-          <TabsTrigger value="edit" className="gap-1.5">
+        <TabsList className="mb-5 w-full sm:w-auto bg-white/50 backdrop-blur-sm border border-white/40 p-1 rounded-xl">
+          <TabsTrigger value="edit" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
             <Pencil className="h-3.5 w-3.5" /> Edit Pricing
           </TabsTrigger>
-          <TabsTrigger value="whatsapp" className="gap-1.5">
+          <TabsTrigger value="whatsapp" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
             <Smartphone className="h-3.5 w-3.5" /> WhatsApp
           </TabsTrigger>
-          <TabsTrigger value="email" className="gap-1.5">
+          <TabsTrigger value="email" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
             <Mail className="h-3.5 w-3.5" /> Email
           </TabsTrigger>
         </TabsList>
 
         {/* ===== TAB 1: EDIT PRICING ===== */}
         <TabsContent value="edit">
-          <Card className="mb-4 border-amber/30 bg-amber-light">
+          <Card className="mb-4 bg-amber-light/50 border-amber/20">
             <CardContent className="p-5">
               <h3 className="font-semibold mb-3">Client Information</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -328,17 +340,17 @@ export default function QuotePreviewPage() {
                 {quote.quoteCars.map((qc) => {
                   const p = carPricing[qc.car.id] || { price: 0, km: 0, extra_km: 0, deposit: 0 };
                   return (
-                    <div key={qc.car.id} className="bg-muted/50 rounded-xl p-4">
-                      <div className="flex items-center gap-3 mb-3 pb-3 border-b">
+                    <div key={qc.car.id} className="bg-white/40 backdrop-blur-sm rounded-2xl p-4 border border-white/30">
+                      <div className="flex items-center gap-3 mb-3 pb-3 border-b border-border/30">
                         {qc.car.image ? (
                           <img
                             src={`/uploads/cars/${qc.car.image}`}
                             alt={qc.car.name}
-                            className="w-20 h-14 rounded-lg object-cover"
+                            className="w-20 h-14 rounded-xl object-cover shadow-sm"
                           />
                         ) : (
-                          <div className="w-20 h-14 rounded-lg bg-muted flex items-center justify-center">
-                            <CarIcon className="h-6 w-6 text-muted-foreground" />
+                          <div className="w-20 h-14 rounded-xl bg-muted/50 flex items-center justify-center">
+                            <CarIcon className="h-6 w-6 text-muted-foreground/40" />
                           </div>
                         )}
                         <div>
@@ -397,9 +409,9 @@ export default function QuotePreviewPage() {
             </CardContent>
           </Card>
 
-          <div className="bg-neutral-900 text-white p-5 rounded-xl flex flex-col sm:flex-row justify-between items-center gap-3">
-            <span className="text-sm font-medium">Total Amount</span>
-            <span className="text-3xl font-bold text-amber">
+          <div className="glass-dark p-5 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-3">
+            <span className="text-sm font-medium text-white/70">Total Amount</span>
+            <span className="text-3xl font-bold text-amber-400 tabular-nums">
               &euro; {totalAmount.toLocaleString()}
             </span>
           </div>
@@ -407,15 +419,15 @@ export default function QuotePreviewPage() {
 
         {/* ===== TAB 2: WHATSAPP IMAGE ===== */}
         <TabsContent value="whatsapp">
-          <Card className="bg-muted/50">
+          <Card>
             <CardContent className="p-5">
               <h3 className="font-semibold mb-3">WhatsApp Image</h3>
               <div className="flex flex-wrap gap-2 mb-4">
-                <Button onClick={handleShare} disabled={imgLoading} className="gap-2 bg-blue-600 hover:bg-blue-700">
+                <Button onClick={handleShare} disabled={imgLoading} className="gap-2 bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/20">
                   {imgLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
                   Share
                 </Button>
-                <Button onClick={handleDownload} disabled={imgLoading} className="gap-2 bg-green-600 hover:bg-green-700">
+                <Button onClick={handleDownload} disabled={imgLoading} className="gap-2 bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/20">
                   {imgLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                   Download
                 </Button>
@@ -426,7 +438,7 @@ export default function QuotePreviewPage() {
 
               <p className="text-xs text-muted-foreground mb-3">Preview (scroll horizontally):</p>
 
-              <div className="overflow-x-auto bg-white rounded-xl p-2">
+              <div className="overflow-x-auto bg-white rounded-2xl p-2 shadow-inner">
                 <div
                   ref={designRef}
                   style={{
@@ -583,7 +595,7 @@ export default function QuotePreviewPage() {
         <TabsContent value="email">
           <Card>
             <CardContent className="p-5">
-              <div className="bg-amber-light border-2 border-amber/30 rounded-lg p-5 mb-6">
+              <div className="bg-amber-light/50 border border-amber/20 rounded-2xl p-5 mb-6">
                 <h3 className="font-semibold mb-2">How to use:</h3>
                 <ol className="text-sm space-y-1 list-decimal list-inside text-muted-foreground">
                   <li>Click &quot;Copy Formatted Email&quot; below</li>
@@ -591,7 +603,7 @@ export default function QuotePreviewPage() {
                   <li>Paste (Ctrl+V) into the email body</li>
                   <li>Add recipient and send!</li>
                 </ol>
-                <Button onClick={copyEmail} className="gap-2 mt-3 bg-primary">
+                <Button onClick={copyEmail} className="gap-2 mt-3">
                   <Copy className="h-4 w-4" /> Copy Formatted Email
                 </Button>
               </div>
@@ -599,7 +611,7 @@ export default function QuotePreviewPage() {
               <h3 className="font-semibold mb-3">Preview:</h3>
               <div
                 id="emailContent"
-                className="border rounded-lg p-6 bg-white"
+                className="border border-white/40 rounded-2xl p-6 bg-white shadow-inner"
                 style={{ fontFamily: "Arial, sans-serif" }}
               >
                 <p style={{ margin: "0 0 1em 0" }}>
@@ -708,6 +720,6 @@ export default function QuotePreviewPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </motion.div>
   );
 }

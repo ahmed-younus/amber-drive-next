@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { NextRequest, NextResponse } from "next/server";
+import { verifyAuth } from "@/lib/verify-token";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function GET(req: NextRequest) {
+  const user = await verifyAuth(req);
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const [totalCars, activeCars, totalQuotes, draftQuotes, sentQuotes, confirmedQuotes] =
     await Promise.all([

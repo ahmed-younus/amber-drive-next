@@ -28,10 +28,10 @@ export function AdminNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+    <header className="sticky top-0 z-50 w-full bg-white/60 backdrop-blur-2xl border-b border-white/40 shadow-sm">
       <div className="container flex h-16 items-center justify-between px-4 max-w-7xl mx-auto">
         {/* Logo */}
-        <Link href="/dashboard">
+        <Link href="/dashboard" className="transition-transform duration-200 hover:scale-105">
           <img
             src="/images/amberdrive-logo-black.svg"
             alt="AMBER"
@@ -40,22 +40,22 @@ export function AdminNavbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-1">
+        <nav className="hidden md:flex items-center gap-1 bg-white/40 backdrop-blur-sm rounded-2xl p-1.5 border border-white/30">
           {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href);
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link key={item.href} href={item.href}>
-                <Button
-                  variant="ghost"
+                <button
                   className={cn(
-                    "gap-2 font-medium",
-                    isActive &&
-                      "bg-neutral-100 text-neutral-900"
+                    "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200",
+                    isActive
+                      ? "bg-white/80 shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/50"
                   )}
                 >
                   <item.icon className="h-4 w-4" />
                   {item.label}
-                </Button>
+                </button>
               </Link>
             );
           })}
@@ -65,7 +65,7 @@ export function AdminNavbar() {
         <Button
           variant="ghost"
           size="sm"
-          className="hidden md:flex gap-2 text-muted-foreground hover:text-red-600"
+          className="hidden md:flex gap-2 text-muted-foreground hover:text-red-600 hover:bg-red-50/50"
           onClick={() => signOut({ callbackUrl: "/login" })}
         >
           <LogOut className="h-4 w-4" />
@@ -75,13 +75,13 @@ export function AdminNavbar() {
         {/* Mobile Menu */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="rounded-xl">
               <Menu className="h-5 w-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-72">
+          <SheetContent side="right" className="w-72 bg-white/80 backdrop-blur-2xl border-l border-white/40">
             <div className="flex flex-col gap-2 mt-8">
-              <div className="px-3 mb-4">
+              <div className="px-3 mb-6">
                 <img
                   src="/images/amberdrive-logo-black.svg"
                   alt="AMBER"
@@ -89,35 +89,35 @@ export function AdminNavbar() {
                 />
               </div>
               {navItems.map((item) => {
-                const isActive = pathname.startsWith(item.href);
+                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
                   >
-                    <Button
-                      variant="ghost"
+                    <button
                       className={cn(
-                        "w-full justify-start gap-3 h-11 font-medium",
-                        isActive && "bg-neutral-100 text-neutral-900"
+                        "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200",
+                        isActive
+                          ? "bg-white/80 shadow-sm text-foreground"
+                          : "text-muted-foreground hover:text-foreground hover:bg-white/50"
                       )}
                     >
                       <item.icon className="h-5 w-5" />
                       {item.label}
-                    </Button>
+                    </button>
                   </Link>
                 );
               })}
-              <div className="border-t mt-4 pt-4">
-                <Button
-                  variant="ghost"
-                  className="w-full justify-start gap-3 h-11 text-red-600 hover:text-red-700 hover:bg-red-50"
+              <div className="border-t border-border/30 mt-4 pt-4">
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50/50 transition-all duration-200"
                   onClick={() => signOut({ callbackUrl: "/login" })}
                 >
                   <LogOut className="h-5 w-5" />
                   Logout
-                </Button>
+                </button>
               </div>
             </div>
           </SheetContent>

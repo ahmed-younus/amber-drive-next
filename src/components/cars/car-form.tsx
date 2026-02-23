@@ -15,8 +15,9 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { CAR_CATEGORIES } from "@/lib/constants";
-import { Upload, X } from "lucide-react";
+import { X, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import type { Car } from "@/types";
 
 interface CarFormProps {
@@ -75,13 +76,18 @@ export function CarForm({ car, mode }: CarFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <motion.form
+      onSubmit={handleSubmit}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+    >
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Image Upload */}
         <Card className="lg:col-span-1">
           <CardContent className="p-6">
-            <Label className="mb-3 block font-semibold">Car Image</Label>
-            <div className="relative aspect-[4/3] bg-muted rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/25 hover:border-primary/50 transition-colors">
+            <Label className="mb-3 block font-semibold text-sm">Car Image</Label>
+            <div className="relative aspect-[4/3] bg-white/30 rounded-2xl overflow-hidden border-2 border-dashed border-border/50 hover:border-primary/40 transition-all duration-300 group">
               {imagePreview ? (
                 <>
                   <img
@@ -95,18 +101,20 @@ export function CarForm({ car, mode }: CarFormProps) {
                       setImagePreview(null);
                       setImageFile(null);
                     }}
-                    className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 hover:bg-black/80"
+                    className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm text-white rounded-xl p-1.5 hover:bg-black/70 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </>
               ) : (
-                <label className="flex flex-col items-center justify-center h-full cursor-pointer">
-                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                  <span className="text-sm text-muted-foreground">
+                <label className="flex flex-col items-center justify-center h-full cursor-pointer group-hover:bg-white/20 transition-colors">
+                  <div className="h-14 w-14 rounded-2xl bg-white/50 flex items-center justify-center mb-3">
+                    <ImageIcon className="h-7 w-7 text-muted-foreground/50" />
+                  </div>
+                  <span className="text-sm font-medium text-muted-foreground">
                     Click to upload
                   </span>
-                  <span className="text-xs text-muted-foreground mt-1">
+                  <span className="text-xs text-muted-foreground/60 mt-1">
                     JPG, PNG, WEBP
                   </span>
                   <input
@@ -152,7 +160,7 @@ export function CarForm({ car, mode }: CarFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
                 <Select name="category" defaultValue={car?.category || ""} required>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white/50 backdrop-blur-sm border-white/50">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -167,7 +175,7 @@ export function CarForm({ car, mode }: CarFormProps) {
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select name="status" defaultValue={car?.status || "active"}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-white/50 backdrop-blur-sm border-white/50">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -233,11 +241,12 @@ export function CarForm({ car, mode }: CarFormProps) {
                 defaultValue={car?.description || ""}
                 placeholder="Short description of the car..."
                 rows={3}
+                className="bg-white/50 backdrop-blur-sm border-white/50 focus:bg-white/80"
               />
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button type="submit" disabled={loading} className="bg-primary">
+              <Button type="submit" disabled={loading}>
                 {loading
                   ? "Saving..."
                   : mode === "add"
@@ -255,6 +264,6 @@ export function CarForm({ car, mode }: CarFormProps) {
           </CardContent>
         </Card>
       </div>
-    </form>
+    </motion.form>
   );
 }

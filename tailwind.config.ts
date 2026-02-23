@@ -76,6 +76,34 @@ const config: Config = {
       fontFamily: {
         sf: ['"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
       },
+      boxShadow: {
+        'glass': '0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04), 0 0 0 1px rgba(255,255,255,0.5) inset',
+        'glass-hover': '0 2px 4px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.6) inset',
+        'glass-lg': '0 4px 6px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.5) inset',
+        'glow-amber': '0 0 20px rgba(196,164,100,0.2), 0 0 40px rgba(196,164,100,0.1)',
+        'glow-amber-sm': '0 0 10px rgba(196,164,100,0.15)',
+        'card-hover': '0 8px 30px rgba(0,0,0,0.08)',
+        'premium': '0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(0,0,0,0.06)',
+      },
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'slide-up': {
+          '0%': { opacity: '0', transform: 'translateY(16px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'scale-in': {
+          '0%': { opacity: '0', transform: 'scale(0.96)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+      },
+      animation: {
+        'fade-in': 'fade-in 0.4s ease-out',
+        'slide-up': 'slide-up 0.5s ease-out',
+        'scale-in': 'scale-in 0.3s ease-out',
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
