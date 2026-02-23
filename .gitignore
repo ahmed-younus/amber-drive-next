@@ -34,3 +34,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# uploads source (raw user files)
+/uploads/
+
+# car images (too large for git, copy from uploads/)
+/public/uploads/cars/
+
+# database dumps
+*.sql

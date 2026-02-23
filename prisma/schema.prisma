@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique @db.VarChar(50)
+  password  String   @db.VarChar(255)
+  email     String   @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("admin_users")
+}
+
+model Car {
+  id             Int        @id @default(autoincrement())
+  name           String     @db.VarChar(100)
+  brand          String     @db.VarChar(50)
+  category       String     @db.VarChar(20)
+  color          String?    @db.VarChar(50)
+  image          String     @db.VarChar(255)
+  defaultPrice   Decimal    @map("default_price") @db.Decimal(10, 2)
+  defaultKm      Int        @map("default_km")
+  defaultExtraKm Decimal    @map("default_extra_km") @db.Decimal(10, 2)
+  defaultDeposit Decimal    @map("default_deposit") @db.Decimal(10, 2)
+  description    String?    @db.Text
+  status         String     @default("active") @db.VarChar(20)
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @default(now()) @updatedAt @map("updated_at")
+  quoteCars      QuoteCar[]
+
+  @@map("cars")
+}
+
+model Quote {
+  id          Int        @id @default(autoincrement())
+  quoteNumber String     @unique @map("quote_number") @db.VarChar(20)
+  clientName  String     @map("client_name") @db.VarChar(100)
+  clientEmail String?    @map("client_email") @db.VarChar(100)
+  quoteDate   DateTime   @map("quote_date") @db.Date
+  destination String?    @db.VarChar(100)
+  totalAmount Decimal?   @map("total_amount") @db.Decimal(10, 2)
+  status      String     @default("draft") @db.VarChar(20)
+  notes       String?    @db.Text
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @default(now()) @updatedAt @map("updated_at")
+  quoteCars   QuoteCar[]
+
+  @@map("quotes")
+}
+
+model QuoteCar {
+  id            Int     @id @default(autoincrement())
+  quoteId       Int     @map("quote_id")
+  carId         Int     @map("car_id")
+  customPrice   Decimal @map("custom_price") @db.Decimal(10, 2)
+  customKm      Int     @map("custom_km")
+  customExtraKm Decimal @map("custom_extra_km") @db.Decimal(10, 2)
+  customDeposit Decimal @map("custom_deposit") @db.Decimal(10, 2)
+  quote         Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  car           Car     @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@map("quote_cars")
+}
