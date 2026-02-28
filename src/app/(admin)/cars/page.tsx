@@ -64,6 +64,7 @@ export default function ManageCarsPage() {
       });
       const res = await fetch(`/api/cars?${params}`);
       const data = await res.json();
+      console.log("Cars API response:", res.status, data);
       setCars(data.cars || []);
       setBrands(data.brands || []);
       setSelected([]);

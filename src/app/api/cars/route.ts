@@ -34,29 +34,33 @@ export async function GET(req: NextRequest) {
   if (brand) where.brand = brand;
   if (category) where.category = category;
 
-  const cars = await prisma.car.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-  });
+  try {
+    const cars = await prisma.car.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+    });
 
-  // Get unique brands for filter
-  const brands = await prisma.car.findMany({
-    select: { brand: true },
-    distinct: ["brand"],
-    where: { status: { not: "archived" } },
-    orderBy: { brand: "asc" },
-  });
+    // Get unique brands for filter
+    const brands = await prisma.car.findMany({
+      select: { brand: true },
+      distinct: ["brand"],
+      where: { status: { not: "archived" } },
+      orderBy: { brand: "asc" },
+    });
 
-  return NextResponse.json({
-    cars: cars.map((c) => ({
-      ...c,
-      default_price: Number(c.defaultPrice),
-      default_km: c.defaultKm,
-      default_extra_km: Number(c.defaultExtraKm),
-      default_deposit: Number(c.defaultDeposit),
-    })),
-    brands: brands.map((b) => b.brand),
-  });
+    return NextResponse.json({
+      cars: cars.map((c) => ({
+        ...c,
+        default_price: Number(c.defaultPrice),
+        default_km: c.defaultKm,
+        default_extra_km: Number(c.defaultExtraKm),
+        default_deposit: Number(c.defaultDeposit),
+      })),
+      brands: brands.map((b) => b.brand),
+    });
+  } catch (e) {
+    return NextResponse.json({ error: "DB error", detail: String(e), cars: [], brands: [] }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
