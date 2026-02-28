@@ -58,6 +58,7 @@ export default function DashboardPage() {
     fetch("/api/stats")
       .then((r) => r.json())
       .then(setStats)
+      .catch(() => setStats(null))
       .finally(() => setLoading(false));
   }, []);
 

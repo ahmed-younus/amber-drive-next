@@ -6,33 +6,37 @@ export async function GET(req: NextRequest) {
   const user = await verifyAuth(req);
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [totalCars, activeCars, totalQuotes, draftQuotes, sentQuotes, confirmedQuotes] =
-    await Promise.all([
-      prisma.car.count(),
-      prisma.car.count({ where: { status: "active" } }),
-      prisma.quote.count(),
-      prisma.quote.count({ where: { status: "draft" } }),
-      prisma.quote.count({ where: { status: "sent" } }),
-      prisma.quote.count({ where: { status: "confirmed" } }),
-    ]);
+  try {
+    const [totalCars, activeCars, totalQuotes, draftQuotes, sentQuotes, confirmedQuotes] =
+      await Promise.all([
+        prisma.car.count(),
+        prisma.car.count({ where: { status: "active" } }),
+        prisma.quote.count(),
+        prisma.quote.count({ where: { status: "draft" } }),
+        prisma.quote.count({ where: { status: "sent" } }),
+        prisma.quote.count({ where: { status: "confirmed" } }),
+      ]);
 
-  const recentQuotes = await prisma.quote.findMany({
-    take: 5,
-    orderBy: { createdAt: "desc" },
-    include: {
-      quoteCars: {
-        include: { car: true },
+    const recentQuotes = await prisma.quote.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      include: {
+        quoteCars: {
+          include: { car: true },
+        },
       },
-    },
-  });
+    });
 
-  return NextResponse.json({
-    total_cars: totalCars,
-    active_cars: activeCars,
-    total_quotes: totalQuotes,
-    draft_quotes: draftQuotes,
-    sent_quotes: sentQuotes,
-    confirmed_quotes: confirmedQuotes,
-    recent_quotes: recentQuotes,
-  });
+    return NextResponse.json({
+      total_cars: totalCars,
+      active_cars: activeCars,
+      total_quotes: totalQuotes,
+      draft_quotes: draftQuotes,
+      sent_quotes: sentQuotes,
+      confirmed_quotes: confirmedQuotes,
+      recent_quotes: recentQuotes,
+    });
+  } catch (e) {
+    return NextResponse.json({ error: "DB error", detail: String(e) }, { status: 500 });
+  }
 }
