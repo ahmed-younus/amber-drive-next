@@ -53,12 +53,17 @@ export default function QuotesLogPage() {
 
   const fetchQuotes = async () => {
     setLoading(true);
-    const params = new URLSearchParams({ search });
-    const res = await fetch(`/api/quotes?${params}`);
-    const data = await res.json();
-    setQuotes(data.quotes || []);
-    setSelected([]);
-    setLoading(false);
+    try {
+      const params = new URLSearchParams({ search });
+      const res = await fetch(`/api/quotes?${params}`);
+      const data = await res.json();
+      setQuotes(data.quotes || []);
+      setSelected([]);
+    } catch {
+      setQuotes([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

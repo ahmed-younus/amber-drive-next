@@ -55,18 +55,24 @@ export default function ManageCarsPage() {
 
   const fetchCars = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams({
-      status: tab,
-      search,
-      brand: brandFilter,
-      category: categoryFilter,
-    });
-    const res = await fetch(`/api/cars?${params}`);
-    const data = await res.json();
-    setCars(data.cars || []);
-    setBrands(data.brands || []);
-    setSelected([]);
-    setLoading(false);
+    try {
+      const params = new URLSearchParams({
+        status: tab,
+        search,
+        brand: brandFilter,
+        category: categoryFilter,
+      });
+      const res = await fetch(`/api/cars?${params}`);
+      const data = await res.json();
+      setCars(data.cars || []);
+      setBrands(data.brands || []);
+      setSelected([]);
+    } catch {
+      setCars([]);
+      setBrands([]);
+    } finally {
+      setLoading(false);
+    }
   }, [tab, search, brandFilter, categoryFilter]);
 
   useEffect(() => {

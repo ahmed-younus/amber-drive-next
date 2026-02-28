@@ -19,17 +19,20 @@ export async function GET(req: NextRequest) {
     ];
   }
 
-  const quotes = await prisma.quote.findMany({
-    where,
-    orderBy: { createdAt: "desc" },
-    include: {
-      quoteCars: {
-        include: { car: true },
+  try {
+    const quotes = await prisma.quote.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: {
+        quoteCars: {
+          include: { car: true },
+        },
       },
-    },
-  });
-
-  return NextResponse.json({ quotes });
+    });
+    return NextResponse.json({ quotes });
+  } catch (e) {
+    return NextResponse.json({ error: "DB error", detail: String(e), quotes: [] }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {
