@@ -205,7 +205,7 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {stats.recent_quotes.length === 0 ? (
+            {!stats.recent_quotes || stats.recent_quotes.length === 0 ? (
               <div className="text-center py-12">
                 <div className="h-14 w-14 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <FileText className="h-7 w-7 text-muted-foreground/50" />

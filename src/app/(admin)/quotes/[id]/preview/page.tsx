@@ -29,6 +29,8 @@ import {
   Car as CarIcon,
   Trash2,
   ArrowLeft,
+  X,
+  ZoomIn,
 } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
@@ -70,7 +72,12 @@ export default function QuotePreviewPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<"idle" | "saving" | "saved">("idle");
   const [imgLoading, setImgLoading] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [previewHeight, setPreviewHeight] = useState(0);
   const designRef = useRef<HTMLDivElement>(null);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // Editable fields
@@ -80,6 +87,25 @@ export default function QuotePreviewPage() {
   const [carPricing, setCarPricing] = useState<
     Record<number, { price: number; km: number; extra_km: number; deposit: number }>
   >({});
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+      if (previewContainerRef.current) {
+        setContainerWidth(previewContainerRef.current.clientWidth - 16);
+      }
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Measure design height after render for proper scaled container sizing
+  useEffect(() => {
+    if (designRef.current && isMobile) {
+      setPreviewHeight(designRef.current.scrollHeight);
+    }
+  }, [quote, isMobile, carPricing]);
 
   useEffect(() => {
     fetch(`/api/quotes/${params.id}`)
@@ -436,9 +462,40 @@ export default function QuotePreviewPage() {
                 </Button>
               </div>
 
-              <p className="text-xs text-muted-foreground mb-3">Preview (scroll horizontally):</p>
+              <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1.5">
+                Preview <span className="hidden sm:inline">(scroll horizontally)</span>
+                <span className="sm:hidden inline text-primary">(tap to zoom)</span>
+              </p>
 
-              <div className="overflow-x-auto bg-white rounded-2xl p-2 shadow-inner">
+              <div
+                ref={previewContainerRef}
+                className="relative bg-white rounded-2xl p-2 shadow-inner overflow-hidden sm:overflow-x-auto"
+                onClick={() => {
+                  if (isMobile) setLightboxOpen(true);
+                }}
+                style={{ cursor: isMobile ? "pointer" : "default" }}
+              >
+                {/* Mobile zoom hint */}
+                {isMobile && (
+                  <div className="absolute top-4 right-4 z-10 bg-black/60 text-white rounded-full p-2 pointer-events-none">
+                    <ZoomIn className="h-4 w-4" />
+                  </div>
+                )}
+                <div
+                  style={isMobile && containerWidth > 0 && previewHeight > 0 ? {
+                    width: containerWidth,
+                    height: previewHeight * Math.min(1, containerWidth / designWidth),
+                    overflow: "hidden",
+                  } : undefined}
+                >
+                <div
+                  className="origin-top-left"
+                  style={isMobile && containerWidth > 0 ? {
+                    transform: `scale(${Math.min(1, containerWidth / designWidth)})`,
+                    transformOrigin: "top left",
+                    width: designWidth,
+                  } : undefined}
+                >
                 <div
                   ref={designRef}
                   style={{
@@ -502,7 +559,7 @@ export default function QuotePreviewPage() {
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
-                            padding: "0 0 18px",
+                            padding: "16px 20px 18px",
                             gap: 18,
                             width: 440,
                             background: "#FFFFFF",
@@ -511,7 +568,7 @@ export default function QuotePreviewPage() {
                             borderRadius: 22,
                           }}
                         >
-                          <div style={{ width: 440, height: 340, borderRadius: "22px 22px 0 0", overflow: "hidden" }}>
+                          <div style={{ width: 400, height: 225, borderRadius: 16, overflow: "hidden" }}>
                             {qc.car.image ? (
                               <img
                                 src={`${typeof window !== "undefined" ? window.location.origin : ""}/uploads/cars/${qc.car.image}`}
@@ -586,7 +643,174 @@ export default function QuotePreviewPage() {
                     Reserve now for guaranteed model allocation.
                   </div>
                 </div>
+                </div>
+                </div>
               </div>
+
+              {/* Lightbox */}
+              {lightboxOpen && (
+                <div
+                  className="fixed inset-0 z-50 bg-black/90 flex items-start justify-center overflow-auto"
+                  onClick={() => setLightboxOpen(false)}
+                >
+                  <button
+                    className="fixed top-4 right-4 z-50 bg-white/20 hover:bg-white/30 text-white rounded-full p-2 transition-colors"
+                    onClick={() => setLightboxOpen(false)}
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                  <div
+                    className="py-8 px-4 touch-pan-y"
+                    style={{ width: designWidth + 32, minWidth: "fit-content" }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div
+                      style={{
+                        width: designWidth,
+                        minWidth: designWidth,
+                        background: "#FFFFFF",
+                        fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, Arial, sans-serif",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        padding: "50px 20px",
+                        gap: 50,
+                        borderRadius: 16,
+                      }}
+                    >
+                      {/* Lightbox renders the same design at full size for pinch-to-zoom */}
+                      {/* Header */}
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 60, width: 877 }}>
+                        <div style={{ width: 877, height: 135, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <img
+                            src={`${typeof window !== "undefined" ? window.location.origin : ""}/images/amberdrive-logo-black.svg`}
+                            alt="AMBER"
+                            style={{ width: 877, height: 135, objectFit: "contain" }}
+                          />
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 36, width: 877 }}>
+                          <div style={{ width: 877, fontWeight: 500, fontSize: 32, lineHeight: "38px", textAlign: "center", color: "#404040" }}>
+                            Performance. Precision. Personal Service.
+                          </div>
+                          <div style={{ display: "flex", justifyContent: "center", gap: 20 }}>
+                            {["All Experiences", "Business", "Escape", "Adrenaline"].map((t, i) => (
+                              <div
+                                key={t}
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "center",
+                                  padding: "12px 32px",
+                                  height: 53,
+                                  borderRadius: 18,
+                                  fontSize: 24,
+                                  fontWeight: i === 0 ? 600 : 500,
+                                  background: i === 0 ? "#191919" : "#EBEBEB",
+                                  color: i === 0 ? "#FFFFFF" : "#333333",
+                                }}
+                              >
+                                {t}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      {/* Cards */}
+                      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 30 }}>
+                        {quote.quoteCars.map((qc) => {
+                          const p = carPricing[qc.car.id] || { price: 0, km: 0, extra_km: 0, deposit: 0 };
+                          return (
+                            <div
+                              key={qc.car.id}
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                padding: "16px 20px 18px",
+                                gap: 18,
+                                width: 440,
+                                background: "#FFFFFF",
+                                border: "2px solid rgba(25,25,25,0.1)",
+                                boxShadow: "-3.6px 5.4px 7.2px rgba(0,0,0,0.12)",
+                                borderRadius: 22,
+                              }}
+                            >
+                              <div style={{ width: 400, height: 225, borderRadius: 16, overflow: "hidden" }}>
+                                {qc.car.image ? (
+                                  <img
+                                    src={`${typeof window !== "undefined" ? window.location.origin : ""}/uploads/cars/${qc.car.image}`}
+                                    alt={qc.car.name}
+                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                                  />
+                                ) : (
+                                  <div style={{ width: "100%", height: "100%", background: "#f5f5f5", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48, color: "#ccc" }}>
+                                    car
+                                  </div>
+                                )}
+                              </div>
+                              <div style={{ display: "flex", flexDirection: "column", gap: 12, width: 404, height: 146 }}>
+                                <div style={{ fontWeight: 700, fontSize: 32, lineHeight: "38px", color: "#191919", overflow: "hidden", height: 76 }}>
+                                  {qc.car.name}
+                                </div>
+                                <div style={{ fontWeight: 400, fontSize: 24, lineHeight: "29px", color: "#616161", overflow: "hidden", height: 58 }}>
+                                  {qc.car.description || "Premium luxury vehicle for your exceptional journey."}
+                                </div>
+                              </div>
+                              <div style={{ display: "flex", flexDirection: "column", gap: 18, width: 404 }}>
+                                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "20px 18px", width: 404, height: 83, background: "#C3A464", borderRadius: 40 }}>
+                                  <span style={{ fontWeight: 700, fontSize: 36, color: "#FFFFFF" }}>
+                                    &euro; {p.price.toLocaleString()}
+                                  </span>
+                                </div>
+                                {[
+                                  `${p.km.toLocaleString()} km included total`,
+                                  `€${p.extra_km} / Extra km`,
+                                  `Deposit € ${p.deposit.toLocaleString()}`,
+                                ].map((text) => (
+                                  <div
+                                    key={text}
+                                    style={{
+                                      display: "flex",
+                                      justifyContent: "center",
+                                      alignItems: "center",
+                                      padding: 18,
+                                      width: 404,
+                                      height: 65,
+                                      background: "#E6E6E6",
+                                      borderRadius: 40,
+                                    }}
+                                  >
+                                    <span style={{ fontWeight: 500, fontSize: 24, color: "#191919" }}>
+                                      {text}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {/* Footer */}
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                        {[
+                          "Guaranteed model - colour subject to availability.",
+                          "Delivery and collection included at your chosen address.",
+                          "Additional kilometers can be purchased in advance at preferential rates.",
+                        ].map((text) => (
+                          <div key={text} style={{ display: "flex", alignItems: "center", gap: 10, height: 42 }}>
+                            <span style={{ fontWeight: 500, fontSize: 24, color: "rgba(97,97,97,0.8)" }}>
+                              {text}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ fontWeight: 600, fontSize: 32, textAlign: "center", color: "#191919" }}>
+                        Reserve now for guaranteed model allocation.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -643,7 +867,7 @@ export default function QuotePreviewPage() {
                             ["Refundable Security Deposit", `${p.deposit.toLocaleString()} EUR`],
                           ].map(([label, val]) => (
                             <tr key={label}>
-                              <td style={{ padding: 12, border: "1px solid #ddd", background: "#f8f8f8", fontWeight: 600, width: "50%" }}>
+                              <td style={{ padding: 12, border: "1px solid #ddd", background: "#FFFFFF", fontWeight: 600, width: "50%" }}>
                                 {label}
                               </td>
                               <td style={{ padding: 12, border: "1px solid #ddd", width: "50%" }}>
@@ -663,7 +887,7 @@ export default function QuotePreviewPage() {
                     </p>
                     <table style={{ width: "100%", borderCollapse: "collapse", margin: "20px 0" }}>
                       <thead>
-                        <tr style={{ background: "#f8f8f8" }}>
+                        <tr style={{ background: "#FFFFFF" }}>
                           {["Car", "Price", "Included KM", "Extra KM", "Deposit"].map((h) => (
                             <th key={h} style={{ padding: 12, textAlign: "left", border: "1px solid #ddd", fontWeight: 600 }}>
                               {h}

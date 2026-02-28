@@ -13,6 +13,7 @@ import {
   Settings,
   LogOut,
   Menu,
+  Plus,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -61,16 +62,27 @@ export function AdminNavbar() {
           })}
         </nav>
 
-        {/* Desktop Logout */}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="hidden md:flex gap-2 text-muted-foreground hover:text-red-600 hover:bg-red-50/50"
-          onClick={() => signOut({ callbackUrl: "/login" })}
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center gap-2">
+          <Link href="/quotes/new">
+            <Button
+              size="sm"
+              className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm rounded-xl"
+            >
+              <Plus className="h-4 w-4" />
+              New Quote
+            </Button>
+          </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2 text-muted-foreground hover:text-red-600 hover:bg-red-50/50"
+            onClick={() => signOut({ callbackUrl: "/login" })}
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
 
         {/* Mobile Menu */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -110,6 +122,12 @@ export function AdminNavbar() {
                   </Link>
                 );
               })}
+              <Link href="/quotes/new" onClick={() => setMobileOpen(false)}>
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200">
+                  <Plus className="h-5 w-5" />
+                  New Quote
+                </button>
+              </Link>
               <div className="border-t border-border/30 mt-4 pt-4">
                 <button
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:text-red-600 hover:bg-red-50/50 transition-all duration-200"
